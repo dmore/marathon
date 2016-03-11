@@ -11,6 +11,7 @@ import mesosphere.marathon.core.CoreGuiceModule
 import mesosphere.marathon.event.EventModule
 import mesosphere.marathon.event.http.HttpEventModule
 import mesosphere.marathon.metrics.{ MetricsReporterModule, MetricsReporterService }
+import org.apache.zookeeper.KeeperException
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -27,7 +28,15 @@ class MarathonApp extends App {
     val client = new ZooKeeperClient(
       Amount.of(conf.zooKeeperSessionTimeout().toInt, Time.MILLISECONDS),
       conf.zooKeeperHostAddresses.asJavaCollection
-    )
+    ) {
+      override def shouldRetry(e: KeeperException): Boolean = {
+        log.error(s"Got ZooKeeper exception: $e")
+        log.error("Committing suicide to avoid invalidating ZooKeeper state")
+        // scalastyle:off magic.number
+        sys.exit(9)
+        // scalastyle:on
+      }
+    }
 
     // Marathon can't do anything useful without a ZK connection
     // so we wait to proceed until one is available
