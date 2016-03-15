@@ -52,7 +52,6 @@ private[reconcile] class OfferMatcherReconciler(taskTracker: TaskTracker, groupR
           case (taskId, spuriousResources) if spurious(taskId) =>
             val unreserveAndDestroy =
               TaskOp.UnreserveAndDestroyVolumes(
-                // FIXME (3221): is ForceExpunge correct here?
                 newTask = TaskStateOp.ForceExpunge(taskId),
                 oldTask = tasksByApp.task(taskId),
                 resources = spuriousResources.to[Seq]
