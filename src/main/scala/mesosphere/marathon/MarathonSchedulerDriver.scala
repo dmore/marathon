@@ -5,6 +5,8 @@ import java.io.{ IOException, FileInputStream }
 import com.google.protobuf.ByteString
 import mesosphere.chaos.http.HttpConf
 import org.apache.mesos.Protos.{ Credential, FrameworkInfo, FrameworkID }
+import FrameworkInfo.Capability
+
 import org.apache.mesos.{ MesosSchedulerDriver, SchedulerDriver }
 import org.slf4j.LoggerFactory
 
@@ -66,6 +68,9 @@ object MarathonSchedulerDriver {
 
         credentialBuilder.build()
       }
+
+    // define opt-in capabilities
+    frameworkInfoBuilder.addCapabilities(Capability.newBuilder().setType(Capability.Type.TASK_KILLING_STATE))
 
     val frameworkInfo = frameworkInfoBuilder.build()
 
